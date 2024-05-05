@@ -31,42 +31,42 @@ class TableRestoListApiView(APIView):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
   
 class TableRestoDetailApiView(APIView):
-  # method get specific data
+  # method to get specific data
   def get_object(self, id):
     try:
       return TableResto.objects.get(id=id)
     except TableResto.DoesNotExist:
       return None
-  
+    
   def get(self, request, *args, **kwargs):
-    table_resto_instance = self.get_object(id)
+    table_resto_instance = self.get_object(self.kwargs['id'])
     if not table_resto_instance:
       return Response(
         {
-          'status': status.HTTP_400_BAD_REQUEST,
+          'status': status.HTTP_404_NOT_FOUND,
           'message': 'Data not found',
           'data': {}
-        }, status=status.HTTP_400_BAD_REQUEST
+        }, status=status.HTTP_404_NOT_FOUND
       )
     
-    seriliazer = TableRestoSerializer(table_resto_instance)
+    serializer = TableRestoSerializer(table_resto_instance)
     response = {
-      'status': status.HTTP_400_BAD_REQUEST,
+      'status': status.HTTP_200_OK,
       'message': 'Data retrieved successfully',
-      'data': seriliazer.data
+      'data': serializer.data
     }
     return Response(response, status=status.HTTP_200_OK)
-  
-  # method PUT
+    
+  # method to update data
   def put(self, request, *args, **kwargs):
-    table_resto_instance = self.get_object(id)
+    table_resto_instance = self.get_object(self.kwargs['id'])
     if not table_resto_instance:
       return Response(
         {
-          'status': status.HTTP_400_BAD_REQUEST,
+          'status': status.HTTP_404_NOT_FOUND,
           'message': 'Data not found',
           'data': {}
-        }, status=status.HTTP_400_BAD_REQUEST
+        }, status=status.HTTP_404_NOT_FOUND
       )
     
     data = {
@@ -76,7 +76,6 @@ class TableRestoDetailApiView(APIView):
       'table_status': request.data.get('table_status'),
       'status': request.data.get('status'),
     }
-
     serializer = TableRestoSerializer(instance=table_resto_instance, data=data, partial=True)
     if serializer.is_valid():
       serializer.save()
@@ -87,7 +86,7 @@ class TableRestoDetailApiView(APIView):
       }
       return Response(response, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-  
+
   # method DELETE
   def delete(self, request, id, *args, **kwargs):
     table_resto_instance = self.get_object(id)
