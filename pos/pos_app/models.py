@@ -120,10 +120,10 @@ class Profile(models.Model):
     return f'{self.user.first_name} {self.user.last_name} {self.user.id}'
 
 class TableResto(models.Model):
-  status_choices = (
-    ('Aktif', 'Aktif'),
-    ('Tidak Aktif', 'Tidak Aktif'),
-  )
+  # status_choices = (
+  #   ('Aktif', 'Aktif'),
+  #   ('Tidak Aktif', 'Tidak Aktif'),
+  # )
   status_table_choices = (
     ('Kosong', 'Kosong'),
     ('Terisi', 'Terisi'),
@@ -132,9 +132,68 @@ class TableResto(models.Model):
   name = models.CharField(max_length=100)
   capacity = models.IntegerField(default=0)
   table_status = models.CharField(max_length=15, choices=status_table_choices, default='Kosong')
-  status = models.CharField(max_length=15, choices=status_choices, default='Aktif')
+  status = models.ForeignKey(StatusModel, related_name='status_table_resto', default=StatusModel.objects.first().pk, on_delete=models.PROTECT)
   user_create = models.ForeignKey(User, related_name='user_create_table_resto', blank=True, null=True, on_delete=models.SET_NULL)
   user_update = models.ForeignKey(User, related_name='user_update_table_resto', blank=True, null=True, on_delete=models.SET_NULL)
+  created_on = models.DateTimeField(auto_now_add=True)
+  last_modified = models.DateTimeField(auto_now=True)
+
+  def __str__(self):
+    return self.name
+  
+def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+  if self.id: 
+    # update profile
+    try: 
+      this = Profile.objects.get(id=self.id)
+      if this.avatar != self.avatar:
+        var_avatar = self.avatar
+        self.avatar = compress_image(var_avatar, 'profile')
+        this.avatar.delete()
+    except: pass
+    super(Profile, self).save(*args, **kwargs)
+  
+  else:
+    # create profile
+    if self.avatar:
+      var_avatar = self.avatar
+      self.avatar = compress_image(var_avatar, 'profile')
+    super(Profile, self).save(*args, **kwargs)
+
+class Category(models.Model):
+  name = models.CharField(max_length=100)
+  status = models.ForeignKey(StatusModel, related_name='status_category', default=StatusModel.objects.first().pk, on_delete=models.PROTECT)
+  user_create = models.ForeignKey(User, related_name='user_create_category', blank=True, null=True, on_delete=models.SET_NULL)
+  user_update = models.ForeignKey(User, related_name='user_update_category', blank=True, null=True, on_delete=models.SET_NULL)
+  created_on = models.DateTimeField(auto_now_add=True)
+  last_modified = models.DateTimeField(auto_now=True)
+
+  def __str__(self):
+    return self.name
+  
+def increment_menu_resto_code():
+  last_code = MenuResto.objects.all().order_by('id').last()
+  if not last_code:
+    return 'MN-0001'
+  code = last_code.code
+  code_int = int(code[3:7])
+  new_code_int = code_int + 1
+  return 'MN-' + str(new_code_int).zfill(4)
+class MenuResto(models.Model):
+  status_menu_choices = (
+    ('Ada', 'Ada'),
+    ('Habis', 'Habis'),
+  )
+  code = models.CharField(max_length=20, default=increment_menu_resto_code, editable=False)
+  name = models.CharField(max_length=100)
+  price = models.DecimalField(max_digits=10, decimal_places=2)
+  decription = models.CharField(max_length=200)
+  image_menu = models.ImageField(default=None, upload_to='menu_images/', blank=True, null=True)
+  category = models.ForeignKey(Category, related_name='category_menu', blank=True, null=True, on_delete=models.SET_NULL)
+  menu_status = models.CharField(max_length=15, choices=status_menu_choices, default='Ada')
+  status = models.ForeignKey(StatusModel, related_name='status_menu', default=StatusModel.objects.first().pk, on_delete=models.PROTECT)
+  user_create = models.ForeignKey(User, related_name='user_create_menu', blank=True, null=True, on_delete=models.SET_NULL)
+  user_update = models.ForeignKey(User, related_name='user_update_menu', blank=True, null=True, on_delete=models.SET_NULL)
   created_on = models.DateTimeField(auto_now_add=True)
   last_modified = models.DateTimeField(auto_now=True)
 
