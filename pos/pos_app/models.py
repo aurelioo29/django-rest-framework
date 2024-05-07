@@ -90,6 +90,35 @@ class User(AbstractUser):
   def __str__(self):
     return str(self.username) + ' ' + str(self.first_name) + ' ' + str(self.last_name)
 
+class StatusModel(models.Model):
+  status_choices = (
+    ('Aktif', 'Aktif'),
+    ('Tidak Aktif', 'Tidak Aktif'),
+  )
+  name = models.CharField(max_length=50, unique=True)
+  description = models.TextField(blank=True, null=True)
+  status = models.CharField(max_length=15, choices=status_choices, default='Aktif')
+  user_create = models.ForeignKey(User, related_name='user_create_status_model', blank=True, null=True, on_delete=models.SET_NULL)
+  user_update = models.ForeignKey(User, related_name='user_update_status_model', blank=True, null=True, on_delete=models.SET_NULL)
+  created_on = models.DateTimeField(auto_now_add=True)
+  last_modified = models.DateTimeField(auto_now=True)
+
+  def __str__(self):
+    return str(self.name)
+
+class Profile(models.Model):
+  user = models.OneToOneField(User, related_name='user_profile', on_delete=models.PROTECT)
+  avatar = models.ImageField(default=None, upload_to='profile_images/', blank=True, null=True)
+  bio = models.TextField()
+  status = models.ForeignKey(StatusModel, related_name='status_profile', default=StatusModel.objects.first().pk, on_delete=models.PROTECT)
+  user_create = models.ForeignKey(User, related_name='user_create_profile', blank=True, null=True, on_delete=models.SET_NULL)
+  user_update = models.ForeignKey(User, related_name='user_update_profile', blank=True, null=True, on_delete=models.SET_NULL)
+  created_on = models.DateTimeField(auto_now_add=True)
+  last_modified = models.DateTimeField(auto_now=True)
+
+  def __str__(self):
+    return f'{self.user.first_name} {self.user.last_name} {self.user.id}'
+
 class TableResto(models.Model):
   status_choices = (
     ('Aktif', 'Aktif'),
