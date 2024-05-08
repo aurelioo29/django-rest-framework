@@ -199,3 +199,89 @@ class MenuResto(models.Model):
 
   def __str__(self):
     return self.name
+
+def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+  if self.id:
+    # update menuResto
+    try:
+      this = MenuResto.objects.get(id=self.id)
+      if this.image_menu != self.image_menu:
+        var_image_menu = self.image_menu
+        self.image_menu = compress_image(var_image_menu, 'menu')
+        this.image_menu.delete()
+
+    except: pass
+    super(MenuResto, self).save(*args, **kwargs)
+  
+  else:
+    # create menuResto
+    if self.image_menu:
+      var_image_menu = self.image_menu
+      self.image_menu = compress_image(var_image_menu, 'menu')
+    super(MenuResto, self).save(*args, **kwargs)
+
+def increment_order_menu_code():
+  last_id = OrderMenu.objects.all().last()
+  m = convert_to_roman(str(datetime.date.today().month))
+
+  if not last_id:
+    return '0001' + '-OM-' + m + '-' + str(datetime.date.today().year)
+  else:
+    code = last_id.code
+    code_first, code_middle_1, code_middle_2, code_last = code.split('-')
+    y = int(code_last[0:4])
+    M = convert_to_number(code_middle_2)
+
+    if ((M == datetime.date.today().month) & (y == datetime.date.today().year)):
+      code_int = int(code_first[0:4])
+      new_code_int = code_int + 1
+      return str(new_code_int).zfill(4)+ '-OM-' + m + '-' + str(datetime.date.today().year)
+    elif ((M != datetime.date.toda().month) | (y != datetime.date.today().year)):
+      return '0001' + '-OM-' + m + '-' + str(datetime.date.today().year)
+    
+class OrderMenu(models.Model):
+  status_order_status_choices = (
+    ('Belum Dibayar', 'Belum Dibayar'),
+    ('Sudah Dibayar', 'Sudah Dibayar'),
+    ('Selesai', 'Selesai'),
+  )
+
+  code = models.CharField(max_length=20, default=increment_order_menu_code, editable=False)
+  table_resto = models.ForeignKey(TableResto, related_name='table_resto_order_menu', blank=True, null=True, on_delete=models.SET_NULL)
+  cashier = models.ForeignKey(User, related_name='cashier_order_menu', blank=True, null=True, on_delete=models.SET_NULL)
+  waitress = models.ForeignKey(User, related_name='waitress_order_menu', blank=True, null=True, on_delete=models.SET_NULL)
+  order_status = models.CharField(max_length=15, choices=status_order_status_choices, default='Belum Dibayar')
+  total_order = models.DecimalField(max_digits=10, default=0, decimal_places=2, blank=True, null=True)
+  tax_order = models.FloatField(default=0, blank=True, null=True)
+  total_payment = models.DecimalField(max_digits=10, default=0, decimal_places=2, blank=True, null=True)
+  payment = models.DecimalField(max_digits=10, default=0, decimal_places=2, blank=True, null=True)
+  changed = models.DecimalField(max_digits=10, default=0, decimal_places=2, blank=True, null=True)
+  status = models.ForeignKey(StatusModel, related_name='status_order_menu', default=StatusModel.objects.first().pk, on_delete=models.PROTECT)
+  user_create = models.ForeignKey(User, related_name='user_create_order_menu', blank=True, null=True, on_delete=models.SET_NULL)
+  user_update = models.ForeignKey(User, related_name='user_update_order_menu', blank=True, null=True, on_delete=models.SET_NULL)
+  created_on = models.DateTimeField(auto_now_add=True)
+  last_modified = models.DateTimeField(auto_now=True)
+
+  def __str__(self):
+    return self.code 
+  
+class OrderMenuDetail(models.Model):
+  status_order_menu_detail_choices = (
+    ('Sedang disiapkan', 'Sedang disiapkan'),
+    ('Sudah disajikan', 'Sudah disajikan'),
+  )
+
+  order_menu = models.ForeignKey(OrderMenu, related_name='order_menu_order_menu_detail', blank=True, null=True, on_delete=models.SET_NULL)
+  menu_resto = models.ForeignKey(MenuResto, related_name='menu_resto_order_menu_detail', blank=True, null=True, on_delete=models.SET_NULL)
+  quantity = models.IntegerField(default=0)
+  subtotal = models.DecimalField(max_digits=10, default=0, decimal_places=2, blank=True, null=True)
+  description = models.TextField(blank=True, null=True, max_length=200)
+  order_menu_detail_status = models.CharField(max_length=20, choices=status_order_menu_detail_choices, default='Sedang disiapkan')
+  status = models.ForeignKey(StatusModel, related_name='status_order_menu_detail', default=StatusModel.objects.first().pk, on_delete=models.PROTECT)
+  user_create = models.ForeignKey(User, related_name='user_create_order_menu_detail', blank=True, null=True, on_delete=models.SET_NULL)
+  user_update = models.ForeignKey(User, related_name='user_update_order_menu_detail', blank=True, null=True, on_delete=models.SET_NULL)
+  created_on = models.DateTimeField(auto_now_add=True)
+  last_modified = models.DateTimeField(auto_now=True)
+
+  def __str__(self):
+    return str(self.order_menu.code) + '-' + str(self.menu_resto.name)
