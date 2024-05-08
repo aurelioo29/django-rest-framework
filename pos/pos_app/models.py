@@ -7,6 +7,15 @@ from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
 # Create your models here.
+
+# /**
+#  * Function convert_to_roman
+#  ! Mengonversi bilangan bulat dari 1 hingga 12 menjadi representasi angka Romawi.
+#  @Parameters:
+#  * `number`: String yang mewakili bilangan bulat dari 1 hingga 12.
+#  @Returns:
+#  * Representasi angka Romawi dari bilangan bulat yang diberikan.
+#  */
 def convert_to_roman(number):
   if number == str(1):
     roman = "I"
@@ -34,6 +43,14 @@ def convert_to_roman(number):
     roman = "XII"
   return roman
 
+# /**
+#  * Function convert_to_number
+#  ! Mengonversi representasi angka Romawi menjadi bilangan bulat dari 1 hingga 12.
+#  @Parameters:
+#  * `roman`: String yang mewakili angka Romawi dari I hingga XII.
+#  @Returns:
+#  * Bilangan bulat yang sesuai dengan representasi angka Romawi yang diberikan.
+#  */
 def convert_to_number(roman):
   if roman == 'I':
     number = int(1)
@@ -61,6 +78,15 @@ def convert_to_number(roman):
     number = int(12)
   return number
 
+# /**
+#  * Function compress_image
+#  ! Mengompresi gambar dan mengembalikan objek InMemoryUploadedFile yang berisi gambar yang telah dikompresi.
+#  @Parameters:
+#  * `image`: Gambar yang akan dikompresi.
+#  * `filename`: Nama file untuk gambar yang dikompresi.
+#  @Returns:
+#  * Objek InMemoryUploadedFile yang berisi gambar yang telah dikompresi.
+#  */
 def compress_image(image, filename):
   curr_datetime = datetime.now().strftime("%Y%m%d %H%M%S")    # Dapatkan tanggal dan waktu saat ini dan formatkan sebagai 'YYYYMMDD HHMMSS'
   im = Image.open(image)  # Buka file gambar
@@ -82,6 +108,16 @@ def compress_image(image, filename):
                                       None)  # Atur charset menjadi None
   return new_image
 
+# /**
+#  * Class User
+#  ! Merepresentasikan pengguna dalam sistem.
+#  @Attributes:
+#  * `is_waitress`: BooleanField, menunjukkan apakah pengguna adalah pelayan. Defaultnya adalah `False`.
+#  * `is_cashier`: BooleanField, menunjukkan apakah pengguna adalah kasir. Defaultnya adalah `False`.
+#  * `is_kitchen`: BooleanField, menunjukkan apakah pengguna adalah bagian dari dapur. Defaultnya adalah `False`.
+#  @Methods:
+#  * `__str__()`: Metode untuk mendapatkan representasi string dari objek. Mengembalikan kombinasi nama pengguna, nama depan, dan nama belakang pengguna.
+#  */
 class User(AbstractUser):
   is_waitress = models.BooleanField(default = False)
   is_cashier = models.BooleanField(default = False)
@@ -90,6 +126,17 @@ class User(AbstractUser):
   def __str__(self):
     return str(self.username) + ' ' + str(self.first_name) + ' ' + str(self.last_name)
 
+# /**
+#  * Class StatusModel
+#  ! Merepresentasikan status dalam sistem.
+#  @Attributes:
+#  * `status_choices`: Tuple yang berisi pilihan status.
+#  * `name`: CharField, nama unik dari status.
+#  * `description`: TextField, deskripsi opsional untuk status. Defaultnya adalah string kosong (`''`).
+#  * `status`: CharField, menunjukkan status. Pilihan status adalah "Aktif" atau "Tidak Aktif". Defaultnya adalah "Aktif".
+#  @Methods:
+#  * `__str__()`: Metode untuk mendapatkan representasi string dari objek. Mengembalikan nilai nama status.
+#  */
 class StatusModel(models.Model):
   status_choices = (
     ('Aktif', 'Aktif'),
@@ -106,6 +153,17 @@ class StatusModel(models.Model):
   def __str__(self):
     return str(self.name)
 
+# /**
+#  * Class Profile
+#  ! Merepresentasikan profil pengguna dalam sistem.
+#  @Attributes:
+#  * `user`: ForeignKey ke model `User`, menunjukkan pengguna terkait dengan profil ini.
+#  * `avatar`: ImageField, menunjukkan gambar profil pengguna. Defaultnya adalah `None`.
+#  * `bio`: TextField, deskripsi singkat tentang pengguna.
+#  * `status`: ForeignKey ke model `StatusModel`, menunjukkan status keseluruhan dari profil. Defaultnya adalah status pertama yang tersedia dalam model `StatusModel`.
+#  @Methods:
+#  * `__str__()`: Metode untuk mendapatkan representasi string dari objek. Mengembalikan kombinasi nama depan, nama belakang, dan ID pengguna.
+#  */
 class Profile(models.Model):
   user = models.OneToOneField(User, related_name='user_profile', on_delete=models.PROTECT)
   avatar = models.ImageField(default=None, upload_to='profile_images/', blank=True, null=True)
@@ -119,6 +177,18 @@ class Profile(models.Model):
   def __str__(self):
     return f'{self.user.first_name} {self.user.last_name} {self.user.id}'
 
+# /**
+#  * Class TableResto
+#  ! Merepresentasikan meja di restoran dalam sistem.
+#  @Attributes:
+#  * `status_table_choices`: Tuple yang berisi pilihan status meja.
+#  * `code`: CharField, kode unik untuk meja.
+#  * `name`: CharField, nama meja.
+#  * `capacity`: IntegerField, kapasitas meja.
+#  * `table_status`: CharField, menunjukkan status meja. Pilihan status adalah "Kosong" atau "Terisi". Defaultnya adalah "Kosong".
+#  @Methods:
+#  * `__str__()`: Metode untuk mendapatkan representasi string dari objek. Mengembalikan nilai nama meja.
+#  */
 class TableResto(models.Model):
   # status_choices = (
   #   ('Aktif', 'Aktif'),
@@ -140,7 +210,21 @@ class TableResto(models.Model):
 
   def __str__(self):
     return self.name
-  
+
+# /**
+#  * Method save
+#  ! Metode untuk menyimpan atau memperbarui objek Profile.
+#  @Parameters:
+#  * `force_insert`: Boolean, menunjukkan apakah harus memaksa operasi insert.
+#  * `force_update`: Boolean, menunjukkan apakah harus memaksa operasi update.
+#  * `using`: String, nama basis data yang akan digunakan.
+#  * `update_fields`: List, daftar bidang yang akan diperbarui.
+#  * `*args, **kwargs`: Argumen tambahan yang diteruskan ke metode save.
+#  @Description:
+#  Metode ini digunakan untuk menyimpan atau memperbarui objek Profile dalam database. Jika objek sudah memiliki ID (artinya objek sudah ada dalam database), maka metode akan mencoba memperbarui objek Profile. 
+#  Jika avatar baru diunggah (berbeda dari avatar sebelumnya), maka avatar akan dikompresi menggunakan fungsi `compress_image` dan avatar lama akan dihapus. Jika objek belum memiliki ID, maka metode akan   
+#  membuat objek Profile baru dan mengompresi avatar jika avatar diunggah.
+#  */
 def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
   if self.id: 
     # update profile
@@ -160,6 +244,19 @@ def save(self, force_insert=False, force_update=False, using=None, update_fields
       self.avatar = compress_image(var_avatar, 'profile')
     super(Profile, self).save(*args, **kwargs)
 
+# /**
+#  * Class Category
+#  ! Merepresentasikan kategori dalam sistem.
+#  @Attributes:
+#  * `name`: CharField, nama kategori.
+#  * `status`: ForeignKey ke model `StatusModel`, menunjukkan status keseluruhan dari kategori. Defaultnya adalah status pertama yang tersedia dalam model `StatusModel`.
+#  * `user_create`: ForeignKey ke model `User`, menunjukkan pengguna yang membuat kategori ini. Defaultnya adalah `None`.
+#  * `user_update`: ForeignKey ke model `User`, menunjukkan pengguna yang terakhir memperbarui kategori ini. Defaultnya adalah `None`.
+#  * `created_on`: DateTimeField, menunjukkan waktu saat kategori ini dibuat. Nilainya akan diatur secara otomatis saat objek dibuat.
+#  * `last_modified`: DateTimeField, menunjukkan waktu saat kategori ini terakhir diubah. Nilainya akan diatur secara otomatis saat objek diperbarui.
+#  @Methods:
+#  * `__str__()`: Metode untuk mendapatkan representasi string dari objek. Mengembalikan nilai nama kategori.
+#  */
 class Category(models.Model):
   name = models.CharField(max_length=100)
   status = models.ForeignKey(StatusModel, related_name='status_category', default=StatusModel.objects.first().pk, on_delete=models.PROTECT)
@@ -170,7 +267,15 @@ class Category(models.Model):
 
   def __str__(self):
     return self.name
-  
+
+# /**
+#  * Function increment_menu_resto_code
+#  ! Fungsi untuk menghasilkan kode unik untuk menu restoran baru.
+#  @Parameters:
+#  * Tidak ada parameter yang diperlukan.
+#  @Returns:
+#  * Kode unik untuk menu restoran baru.
+#  */
 def increment_menu_resto_code():
   last_code = MenuResto.objects.all().order_by('id').last()
   if not last_code:
@@ -179,6 +284,22 @@ def increment_menu_resto_code():
   code_int = int(code[3:7])
   new_code_int = code_int + 1
   return 'MN-' + str(new_code_int).zfill(4)
+
+# /**
+#  * Class MenuResto
+#  ! Merepresentasikan menu restoran dalam sistem.
+#  @Attributes:
+#  * `status_menu_choices`: Tuple yang berisi pilihan status menu.
+#  * `code`: CharField, kode unik untuk menu restoran. Nilainya dihasilkan menggunakan fungsi `increment_menu_resto_code` dan tidak dapat diedit setelah objek dibuat.
+#  * `name`: CharField, nama menu restoran.
+#  * `price`: DecimalField, harga menu restoran.
+#  * `decription`: CharField, deskripsi singkat tentang menu.
+#  * `image_menu`: ImageField, gambar yang menunjukkan menu restoran. Defaultnya adalah `None`.
+#  * `category`: ForeignKey ke model `Category`, menunjukkan kategori menu restoran. Defaultnya adalah `None`.
+#  * `menu_status`: CharField, menunjukkan status menu. Pilihan status adalah "Ada" atau "Habis". Defaultnya adalah "Ada".
+#  @Methods:
+#  * `__str__()`: Metode untuk mendapatkan representasi string dari objek. Mengembalikan nilai nama menu restoran.
+#  */
 class MenuResto(models.Model):
   status_menu_choices = (
     ('Ada', 'Ada'),
@@ -200,6 +321,21 @@ class MenuResto(models.Model):
   def __str__(self):
     return self.name
 
+# /**
+#  * Method save
+#  ! Metode untuk menyimpan atau memperbarui objek MenuResto.
+#  @Parameters:
+#  * `force_insert`: Boolean, menunjukkan apakah harus memaksa operasi insert.
+#  * `force_update`: Boolean, menunjukkan apakah harus memaksa operasi update.
+#  * `using`: String, nama basis data yang akan digunakan.
+#  * `update_fields`: List, daftar bidang yang akan diperbarui.
+#  * `*args, **kwargs`: Argumen tambahan yang diteruskan ke metode save.
+#  @Description:
+#  Metode ini digunakan untuk menyimpan atau memperbarui objek MenuResto dalam database. Jika objek sudah memiliki ID (artinya objek sudah ada dalam database), maka metode akan mencoba memperbarui objek     
+#  MenuResto. Jika gambar menu baru diunggah (berbeda dari gambar sebelumnya), maka gambar akan dikompresi menggunakan fungsi `compress_image` dan gambar lama akan dihapus. Jika objek belum memiliki ID, maka  
+#  metode akan membuat objek MenuResto baru dan mengompresi gambar jika gambar diunggah.
+#  */
+
 def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
   if self.id:
     # update menuResto
@@ -220,6 +356,22 @@ def save(self, force_insert=False, force_update=False, using=None, update_fields
       self.image_menu = compress_image(var_image_menu, 'menu')
     super(MenuResto, self).save(*args, **kwargs)
 
+# /**
+#  * Function increment_order_menu_code
+#  ! Fungsi untuk menghasilkan kode unik untuk pesanan baru dalam format tertentu.
+#  @Returns:
+#  * Kode unik untuk pesanan baru.
+#  @Description:
+#  Fungsi ini menghasilkan kode unik untuk pesanan baru dalam format 'XXXX-OM-MMMM-YYYY', di mana:
+#  - 'XXXX' adalah angka yang menggambarkan urutan pesanan dalam bulan dan tahun saat ini.
+#  - 'OM' adalah bagian tetap dari kode untuk menandakan bahwa itu adalah pesanan.
+#  - 'MMMM' adalah representasi bulan dalam angka Romawi.
+#  - 'YYYY' adalah tahun saat ini.
+#  Fungsi ini mengambil pesanan terakhir dari database dan memeriksa apakah pesanan tersebut dibuat pada bulan dan tahun yang sama dengan bulan dan tahun saat ini. 
+#  Jika ya, maka kode pesanan terakhir akan diubah sedemikian rupa sehingga nomor urutannya bertambah satu.
+#  Jika tidak, maka fungsi akan mengembalikan kode unik untuk pesanan baru dengan nomor urutan dimulai dari 0001.
+# */
+
 def increment_order_menu_code():
   last_id = OrderMenu.objects.all().last()
   m = convert_to_roman(str(datetime.date.today().month))
@@ -239,6 +391,30 @@ def increment_order_menu_code():
     elif ((M != datetime.date.toda().month) | (y != datetime.date.today().year)):
       return '0001' + '-OM-' + m + '-' + str(datetime.date.today().year)
     
+# /**
+#  * Class OrderMenu
+#  ! Merepresentasikan sebuah pesanan dalam sistem.
+#  @Attributes:
+#  * `status_order_status_choices`: Tuple yang berisi pilihan status pesanan.
+#  * `code`: CharField dengan panjang maksimum 20 karakter, merupakan kode unik untuk pesanan. Nilai defaultnya berasal dari fungsi `increment_order_menu_code` dan tidak dapat diedit setelah objek dibuat.
+#  * `table_resto`: ForeignKey ke model `TableResto`, menunjukkan meja restoran yang terkait dengan pesanan. Defaultnya adalah `None`.
+#  * `cashier`: ForeignKey ke model `User`, menunjukkan kasir yang melakukan pesanan ini. Defaultnya adalah `None`.
+#  * `waitress`: ForeignKey ke model `User`, menunjukkan pelayan yang melayani pesanan ini. Defaultnya adalah `None`.
+#  * `order_status`: CharField dengan panjang maksimum 15 karakter, menunjukkan status pesanan. Pilihan status termasuk "Belum Dibayar", "Sudah Dibayar", dan "Selesai". Defaultnya adalah "Belum Dibayar".
+#  * `total_order`: DecimalField, menunjukkan total biaya pesanan sebelum pajak. Defaultnya adalah `0.00`.
+#  * `tax_order`: FloatField, menunjukkan jumlah pajak yang dikenakan pada pesanan. Defaultnya adalah `0`.
+#  * `total_payment`: DecimalField, menunjukkan total pembayaran yang harus dibayar, termasuk pajak. Defaultnya adalah `0.00`.
+#  * `payment`: DecimalField, menunjukkan jumlah pembayaran yang diberikan oleh pelanggan. Defaultnya adalah `0.00`.
+#  * `changed`: DecimalField, menunjukkan jumlah kembalian dari transaksi pembayaran. Defaultnya adalah `0.00`.
+#  * `status`: ForeignKey ke model `StatusModel`, menunjukkan status keseluruhan dari pesanan. Defaultnya adalah status pertama yang tersedia dalam model `StatusModel`.
+#  * `user_create`: ForeignKey ke model `User`, menunjukkan pengguna yang membuat pesanan ini. Defaultnya adalah `None`.
+#  * `user_update`: ForeignKey ke model `User`, menunjukkan pengguna yang terakhir memperbarui pesanan ini. Defaultnya adalah `None`.
+#  * `created_on`: DateTimeField, menunjukkan waktu saat pesanan ini dibuat. Nilainya akan diatur secara otomatis saat objek dibuat.
+#  * `last_modified`: DateTimeField, menunjukkan waktu saat pesanan ini terakhir diubah. Nilainya akan diatur secara otomatis saat objek diperbarui.
+#  @Methods:
+#  * `__str__()`: Metode untuk mendapatkan representasi string dari objek. Mengembalikan nilai kode pesanan sebagai string.
+# */
+
 class OrderMenu(models.Model):
   status_order_status_choices = (
     ('Belum Dibayar', 'Belum Dibayar'),
@@ -265,6 +441,25 @@ class OrderMenu(models.Model):
   def __str__(self):
     return self.code 
   
+# /**
+#  * Class OrderMenuDetail
+#  ! representasikan detail dari sebuah item yang dipesan dalam suatu pesanan.
+#  @Attributes:
+#  * `order_menu`: ForeignKey ke model `OrderMenu`, terkait dengan pesanan yang berisi item ini. Defaultnya adalah `None`.
+#  * `menu_resto`: ForeignKey ke model `MenuResto`, terkait dengan menu restoran yang dipesan. Defaultnya adalah `None`.
+#  * `quantity`: IntegerField, menunjukkan jumlah item yang dipesan. Defaultnya adalah `0`.
+#  * `subtotal`: DecimalField, menunjukkan subtotal dari item ini dalam pesanan. Defaultnya adalah `0.00`.
+#  * `description`: TextField, deskripsi opsional untuk item ini. Defaultnya adalah string kosong (`''`).
+#  * `order_menu_detail_status`: CharField, menunjukkan status dari detail pesanan. Pilihan status adalah "Sedang disiapkan" atau "Sudah disajikan". Defaultnya adalah "Sedang disiapkan".
+#  * `status`: ForeignKey ke model `StatusModel`, menunjukkan status keseluruhan dari detail pesanan. Defaultnya adalah status pertama yang tersedia dalam model `StatusModel`.
+#  * `user_create`: ForeignKey ke model `User`, menunjukkan pengguna yang membuat detail pesanan ini. Defaultnya adalah `None`.
+#  * `user_update`: ForeignKey ke model `User`, menunjukkan pengguna yang terakhir memperbarui detail pesanan ini. Defaultnya adalah `None`.
+#  * `created_on`: DateTimeField, menunjukkan waktu saat detail pesanan ini dibuat. Nilainya akan diatur secara otomatis saat objek dibuat.
+#  * `last_modified`: DateTimeField, menunjukkan waktu saat detail pesanan ini terakhir diubah. Nilainya akan diatur secara otomatis saat objek diperbarui.
+#  @Methods:
+#  * `__str__()`: Metode untuk mendapatkan representasi string dari objek. Mengembalikan string yang terdiri dari kode pesanan (`order_menu.code`) dan nama menu restoran (`menu_resto`).
+# */
+
 class OrderMenuDetail(models.Model):
   status_order_menu_detail_choices = (
     ('Sedang disiapkan', 'Sedang disiapkan'),
