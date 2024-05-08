@@ -284,4 +284,4 @@ class OrderMenuDetail(models.Model):
   last_modified = models.DateTimeField(auto_now=True)
 
   def __str__(self):
-    return str(self.order_menu.code) + '-' + str(self.menu_resto.name)
+    return str(self.order_menu.code) + '-' + str(self.menu_resto)
