@@ -88,24 +88,17 @@ def convert_to_number(roman):
 #  * Objek InMemoryUploadedFile yang berisi gambar yang telah dikompresi.
 #  */
 def compress_image(image, filename):
-  curr_datetime = datetime.now().strftime("%Y%m%d %H%M%S")    # Dapatkan tanggal dan waktu saat ini dan formatkan sebagai 'YYYYMMDD HHMMSS'
-  im = Image.open(image)  # Buka file gambar
+  curr_datetime = datetime.now().strftime("%Y%m%d %H%M%S")
+  im = Image.open(image)
 
-  # Periksa jika mode gambar bukan RGB, konversi ke RGB
   if im.mode != 'RGB':
     im = im.convert('RGB')
 
-  im_io = BytesIO()   # Buat aliran biner di dalam memori untuk menyimpan gambar yang telah dikompresi
-  im.save(im_io, 'jpeg', quality=50, optimize=True)   # Simpan gambar ke dalam aliran di memori sebagai file JPEG dengan kualitas=50 dan optimasi diaktifkan
-  im.seek(0)  # Setel posisi aliran kembali ke awal
+  im_io = BytesIO()
+  im.save(im_io, 'jpeg', quality=50, optimize=True)
+  im.seek(0) 
   
-  # Buat objek InMemoryUploadedFile baru dengan data gambar yang telah dikompresi
-  new_image = InMemoryUploadedFile(im_io,  # Teruskan aliran biner di memori
-                                      'ImageField',  # Tentukan nama field ( diasumsikan 'ImageField')
-                                      '%' + str(filename) + '-' + str(curr_datetime) + '.jpg',  # Tetapkan nama file
-                                      'image/jpeg',  # Tetapkan tipe konten
-                                      sys.getsizeof(im_io),  # Dapatkan ukuran aliran di memori
-                                      None)  # Atur charset menjadi None
+  new_image = InMemoryUploadedFile(im_io, 'ImageField', '%' + str(filename) + '-' + str(curr_datetime) + '.jpg', 'image/jpeg', sys.getsizeof(im_io), None)
   return new_image
 
 # /**
@@ -174,8 +167,8 @@ class Profile(models.Model):
   created_on = models.DateTimeField(auto_now_add=True)
   last_modified = models.DateTimeField(auto_now=True)
 
-  def __str__(self):
-    return f'{self.user.first_name} {self.user.last_name} {self.user.id}'
+#   def __str__(self):
+#     return f'{self.user.first_name} {self.user.last_name} {self.user.id}'
 
 # /**
 #  * Class TableResto
@@ -190,10 +183,6 @@ class Profile(models.Model):
 #  * `__str__()`: Metode untuk mendapatkan representasi string dari objek. Mengembalikan nilai nama meja.
 #  */
 class TableResto(models.Model):
-  # status_choices = (
-  #   ('Aktif', 'Aktif'),
-  #   ('Tidak Aktif', 'Tidak Aktif'),
-  # )
   status_table_choices = (
     ('Kosong', 'Kosong'),
     ('Terisi', 'Terisi'),
