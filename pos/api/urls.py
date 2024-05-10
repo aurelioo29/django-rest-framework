@@ -13,4 +13,5 @@ urlpatterns = [
   path('api/table_resto/<int:id>', views.TableRestoDetailApiView.as_view()),
   path('api/register', RegisterUserAPIView.as_view()),
   path('api/login', LoginView.as_view()),
+  path('api/menu-resto', views.MenuRestoView.as_view()),
 ]

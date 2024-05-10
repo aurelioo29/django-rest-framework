@@ -3,12 +3,13 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import permissions
 from pos_app.models import (User, TableResto, StatusModel, Profile, Category, MenuResto, OrderMenu, OrderMenuDetail)
-from api.serializers import (TableRestoSerializer, RegisterUserSerializer, LoginSerializer)
-# , LoginSerializer, ProfileSerializer, ProfileSerializerII, CategorySerializer, MenuRestoSerializer, StatusModelSerializer, UserSerializer
+from api.serializers import (TableRestoSerializer, RegisterUserSerializer, LoginSerializer, MenuRestoSerializer) # ProfileSerializer, ProfileSerializerII, CategorySerializer, StatusModelSerializer, UserSerializer
 from rest_framework import generics
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import login as django_login, logout as django_logout
 from django.http import JsonResponse, HttpResponse
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 class TableRestoListApiView(APIView):
   # method get
@@ -151,3 +152,19 @@ class LoginView(APIView):
         'is_waitress': user.is_waitress
       }
     })
+
+class MenuRestoView(APIView):
+  authentication_classes = [SessionAuthentication, BasicAuthentication]
+  permission_classes = [IsAuthenticated]
+
+  def get(self, request, *args, **kwargs):
+    menu_restos = MenuResto.objects.select_related('status').filter(status = StatusModel.objects.first())
+    serializer = MenuRestoSerializer(menu_restos, many=True)
+    response = {
+      'status': status.HTTP_200_OK,
+      'message': 'Data sucessfully read',
+      'user': str(request.user),
+      'auth': str(request.auth),
+      'data': serializer.data,
+    }
+    return Response(response, status=status.HTTP_200_OK)

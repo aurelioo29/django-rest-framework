@@ -65,3 +65,8 @@ class LoginSerializer(serializers.Serializer):
       msg = 'Username dan password harus diisi'
       raise ValidationError({'message': msg})
     return data
+
+class MenuRestoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MenuResto
+        fields = '__all__'
