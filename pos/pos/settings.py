@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "pos_app",        # digunakan untuk membangun model dari aplikasi pos_app
     'api',            # digunakan untuk membangun serializers, controller dan routing dari web service
     "rest_framework", # digunakan untuk membangun web service
+    'rest_framework.authtoken', # digunakan untuk token
 ]
 
 AUTH_USER_MODEL = 'pos_app.User'
@@ -75,6 +76,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "pos.wsgi.application"
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases

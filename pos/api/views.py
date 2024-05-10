@@ -3,9 +3,12 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import permissions
 from pos_app.models import (User, TableResto, StatusModel, Profile, Category, MenuResto, OrderMenu, OrderMenuDetail)
-from api.serializers import (TableRestoSerializer, RegisterUserSerializer)
+from api.serializers import (TableRestoSerializer, RegisterUserSerializer, LoginSerializer)
 # , LoginSerializer, ProfileSerializer, ProfileSerializerII, CategorySerializer, MenuRestoSerializer, StatusModelSerializer, UserSerializer
 from rest_framework import generics
+from rest_framework.authtoken.models import Token
+from django.contrib.auth import login as django_login, logout as django_logout
+from django.http import JsonResponse, HttpResponse
 
 class TableRestoListApiView(APIView):
   # method get
@@ -125,3 +128,26 @@ class RegisterUserAPIView(APIView):
       'status': status.HTTP_400_BAD_REQUEST,
       'data': serializer.errors
     }, status = status.HTTP_400_BAD_REQUEST)
+
+class LoginView(APIView):
+  serializer_class = LoginSerializer
+
+  def post(self, request):
+    serializer = LoginSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    user = serializer.validated_data['user']
+    django_login(request, user)
+    token, created = Token.objects.get_or_create(user=user)
+    return JsonResponse({
+      'status': 200,
+      'message': 'Login success',
+      'data': {
+        'token': token.key,
+        'id': user.id,
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'email': user.email,
+        'is_active': user.is_active,
+        'is_waitress': user.is_waitress
+      }
+    })

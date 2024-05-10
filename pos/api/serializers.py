@@ -41,3 +41,27 @@ class RegisterUserSerializer(serializers.ModelSerializer):
     user.set_password(validated_data['password1'])
     user.save()
     return user
+
+class LoginSerializer(serializers.Serializer):
+  username = serializers.CharField()
+  password = serializers.CharField()
+
+  def validate(self, data):
+    username = data.get('username', '')
+    password = data.get('password', '')
+
+    if username and password:
+      user = authenticate(username=username, password=password)
+      if user:
+        if user.is_active and user.is_waitress:
+          data['user'] = user
+        else:
+          msg = 'Status pengguna tidak aktif'
+          raise ValidationError({'message': msg})
+      else:
+        msg = 'Anda tidak memiliki akses'
+        raise ValidationError({'message': msg})
+    else:
+      msg = 'Username dan password harus diisi'
+      raise ValidationError({'message': msg})
+    return data
