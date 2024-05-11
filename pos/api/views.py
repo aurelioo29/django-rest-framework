@@ -11,6 +11,8 @@ from django.http import JsonResponse, HttpResponse
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from .paginators import CustomPagination
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
 
 class TableRestoListApiView(APIView):
   # method get
@@ -175,3 +177,6 @@ class MenuRestoFilterApi(generics.ListAPIView):
   serializer_class = MenuRestoSerializer
   pagination_class = CustomPagination
   permission_classes = [permissions.IsAuthenticated]
+  filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+  filterset_fields = ['category__name']
+  ordering_fields = ['created_on']

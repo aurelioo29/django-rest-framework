@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'api',            # digunakan untuk membangun serializers, controller dan routing dari web service
     "rest_framework", # digunakan untuk membangun web service
     'rest_framework.authtoken', # digunakan untuk token
+    "django_filters"  # digunakan untuk filter
 ]
 
 AUTH_USER_MODEL = 'pos_app.User'
@@ -84,6 +85,9 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.IsAuthenticated'],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend'
+    ]
 }
 
 # Database
