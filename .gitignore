@@ -1,1 +1,5 @@
 env
+
+pos/api/__pycache__/
+pos/pos/__pycache__/
+pos/pos_app/__pycache__/
