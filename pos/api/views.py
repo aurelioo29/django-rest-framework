@@ -10,6 +10,7 @@ from django.contrib.auth import login as django_login, logout as django_logout
 from django.http import JsonResponse, HttpResponse
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from .paginators import CustomPagination
 
 class TableRestoListApiView(APIView):
   # method get
@@ -168,3 +169,9 @@ class MenuRestoView(APIView):
       'data': serializer.data,
     }
     return Response(response, status=status.HTTP_200_OK)
+
+class MenuRestoFilterApi(generics.ListAPIView):
+  queryset = MenuResto.objects.all()
+  serializer_class = MenuRestoSerializer
+  pagination_class = CustomPagination
+  permission_classes = [permissions.IsAuthenticated]
