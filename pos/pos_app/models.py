@@ -167,8 +167,8 @@ class Profile(models.Model):
   created_on = models.DateTimeField(auto_now_add=True)
   last_modified = models.DateTimeField(auto_now=True)
 
-#   def __str__(self):
-#     return f'{self.user.first_name} {self.user.last_name} {self.user.id}'
+  def __str__(self):
+    return f'{self.user.first_name} {self.user.last_name} {self.user.id}'
 
 # /**
 #  * Class TableResto
