@@ -1,7 +1,10 @@
 env
 
-pos/api/__pycache__/
-pos/pos/__pycache__/
-pos/pos_app/__pycache__/
+# Ignore __pycache__ directories
+__pycache__/
+*/__pycache__/
 
-pos/pos_app/migrations/__pycache__/
+# Ignore Django migrations
+*/migrations/*.pyc
+*/migrations/*.py
+!*/migrations/__init__.py
